@@ -72,6 +72,226 @@ class Backend extends CI_Controller {
 		}
 	}
 
+	public function subsections($function="")
+	{
+
+
+		if($function == "")
+		{
+			$data['subsections'] = $this->db->query("select *, (SELECT GROUP_CONCAT(SectionTitle SEPARATOR ', ') FROM sections inner join sectionsubsections on sections.SectionID =sectionsubsections.SectionID  where sectionsubsections.SubSectionID = sub.SubSectionID ) as ParentSections from subsections as sub");
+
+			// echo $this->db->last_query();
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-managesubsections',$data);
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "add")
+		{
+			$data['sections'] = $this->db->get('sections');
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-addsubsection',$data);
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "edit")
+		{
+			$data['sections'] = $this->db->get('sections');
+
+			$this->db->where('SubSectionID',$this->input->get('SubSectionID'));
+			$section_subsections = $this->db->get('sectionsubsections');
+
+			$section_subsections_array = array();
+
+			foreach($section_subsections->result() as $section_subsection) {
+				$section_subsections_array[] = $section_subsection->SectionID;
+			}
+
+			$data['section_subsections'] = $section_subsections_array;
+
+			
+			$this->db->where('SubSectionID',$this->input->get('SubSectionID'));
+			$data['subsection'] = $this->db->get('subsections');
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-editsubsection',$data);
+			$this->load->view('backend/backend-footer');
+		}
+	}
+
+	function savesubsection() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('SubSectionTitle', 'Sub Section Title', 'required');
+		$this->form_validation->set_rules('Section', 'Parent Section', 'required');
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->subsections('add');
+		}
+		else
+		{
+			$this->db->insert('subsections',array('SubSectionTitle'=>$this->input->post('SubSectionTitle'),'Active'=>$this->input->get('Status')));
+
+			$SubSectionID = $this->db->insert_id();
+
+			$parentSectionsArray = array();
+			foreach($this->input->post('Section') as $ParentSection) 
+			{
+				$parentSectionsArray[] = array('SectionID'=>$ParentSection,'SubSectionID'=>$SubSectionID);
+			}
+
+			$this->db->insert_batch('sectionsubsections',$parentSectionsArray);
+
+			redirect('backend/subsections');
+		}
+	}
+
+	function updatesubsection() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('SubSectionTitle', 'Sub Section Title', 'required');
+		$this->form_validation->set_rules('Section', 'Parent Section', 'required');
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->subsections('add');
+		}
+		else
+		{
+			$this->db->where('SubSectionID',$this->input->get('SubSectionID'));
+			$this->db->update('subsections',array('SubSectionTitle'=>$this->input->post('SubSectionTitle'),'Active'=>$this->input->get('Status')));
+
+			$SubSectionID = $this->input->get('SubSectionID');
+
+			$parentSectionsArray = array();
+			foreach($this->input->post('Section') as $ParentSection) 
+			{
+				$parentSectionsArray[] = array('SectionID'=>$ParentSection,'SubSectionID'=>$SubSectionID);
+			}
+
+			
+			$this->db->where('SubSectionID',$this->input->get('SubSectionID'));
+			$this->db->delete('sectionsubsections');
+
+			$this->db->insert_batch('sectionsubsections',$parentSectionsArray);
+
+			redirect('backend/subsections');
+		}
+	}
+
+	public function categories($function="")
+	{
+
+
+		if($function == "")
+		{
+			$data['categories'] = $this->db->query("select *, (SELECT GROUP_CONCAT(SubSectionTitle SEPARATOR ', ') FROM subsections inner join categorysubsections on subsections.SubSectionID =categorysubsections.SubSectionID  where categorysubsections.CategoryID = cat.CategoryID ) as SubSections from categories as cat");
+
+			// echo $this->db->last_query();
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-managecategories',$data);
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "add")
+		{
+			$data['subsections'] = $this->db->get('subsections');
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-addcategory',$data);
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "edit")
+		{
+			$data['subsections'] = $this->db->get('subsections');
+
+			$this->db->where('CategoryID',$this->input->get('CategoryID'));
+			$sectioncategories = $this->db->get('categorysubsections');
+
+			$subsections_categories_array = array();
+
+			foreach($sectioncategories->result() as $sectioncategory) {
+				$subsections_categories_array[] = $sectioncategory->CategoryID;
+			}
+
+			$data['subsections_categories'] = $subsections_categories_array;
+
+			
+			$this->db->where('CategoryID',$this->input->get('CategoryID'));
+			$data['category'] = $this->db->get('categories');
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-editcategory',$data);
+			$this->load->view('backend/backend-footer');
+		}
+	}
+
+	function savecategory() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('CategoryTitle', 'Category Title', 'required');
+		$this->form_validation->set_rules('SubSection', 'Sub Section', 'required');
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->categories('add');
+		}
+		else
+		{
+			$this->db->insert('categories',array('CategoryTitle'=>$this->input->post('CategoryTitle'),'Active'=>$this->input->get('Status')));
+
+			$CategoryID = $this->db->insert_id();
+
+			$subSectionsArray = array();
+
+			foreach($this->input->post('SubSection') as $SubSection) 
+			{
+				$subSectionsArray[] = array('SubSectionID'=>$SubSection,'CategoryID'=>$CategoryID);
+			}
+
+			$this->db->insert_batch('categorysubsections',$subSectionsArray);
+
+			redirect('backend/categories');
+		}
+	}
+
+	function updatecategory() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('CategoryTitle', 'Category Title', 'required');
+		$this->form_validation->set_rules('SubSection', 'Sub Section', 'required');
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->categories('add');
+		}
+		else
+		{
+			$this->db->where('CategoryID',$this->input->get('CategoryID'));
+			$this->db->update('categories',array('CategoryTitle'=>$this->input->post('CategoryTitle'),'Active'=>$this->input->get('Status')));
+
+			$CategoryID = $this->input->get('CategoryID');
+			
+			$this->db->where('CategoryID',$this->input->get('CategoryID'));
+			$this->db->delete('categorysubsections');
+
+			$subSectionsArray = array();
+
+			foreach($this->input->post('SubSection') as $SubSection) 
+			{
+				$subSectionsArray[] = array('SubSectionID'=>$SubSection,'CategoryID'=>$CategoryID);
+			}
+
+			$this->db->insert_batch('categorysubsections',$subSectionsArray);
+
+			redirect('backend/categories');
+		}
+	}
 	public function sections()
 	{
 		try{
@@ -95,31 +315,31 @@ class Backend extends CI_Controller {
 		}
 	}
 
-	public function categories()
-	{
-		try{
-			$crud = new grocery_CRUD();
+	// public function categories()
+	// {
+	// 	try{
+	// 		$crud = new grocery_CRUD();
 
-			$crud->set_theme('datatables');
+	// 		$crud->set_theme('datatables');
 
-			$crud->set_relation_n_n('sections','categorysections','sections','CategoryID','SectionID','SectionTitle','OrderNum');
+	// 		$crud->set_relation_n_n('sections','categorysections','sections','CategoryID','SectionID','SectionTitle','OrderNum');
 			
-			$crud->field_type('Active','true_false');
+	// 		$crud->field_type('Active','true_false');
 
-			// $crud->unset_add();
-			// $crud->unset_delete();
-			// $crud->unset_edit();
+	// 		// $crud->unset_add();
+	// 		// $crud->unset_delete();
+	// 		// $crud->unset_edit();
 			
 			
 
-			$output = $crud->render();
+	// 		$output = $crud->render();
 
-			$this->_example_output($output);
+	// 		$this->_example_output($output);
 
-		}catch(Exception $e){
-			show_error($e->getMessage().' --- '.$e->getTraceAsString());
-		}
-	}
+	// 	}catch(Exception $e){
+	// 		show_error($e->getMessage().' --- '.$e->getTraceAsString());
+	// 	}
+	// }
 
 	public function employees_management()
 	{
