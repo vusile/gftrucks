@@ -2,6 +2,9 @@
 
 class Backend extends CI_Controller {
 
+	public $Logo;
+	public $Catalogue;
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -29,27 +32,27 @@ class Backend extends CI_Controller {
 		$this->_example_output((object)array('output' => '' , 'js_files' => array() , 'css_files' => array()));
 	}
 
-	public function brands()
-	{
-		try{
-			$crud = new grocery_CRUD();
+	// public function brands()
+	// {
+	// 	try{
+	// 		$crud = new grocery_CRUD();
 
-			$crud->set_theme('datatables');
+	// 		$crud->set_theme('datatables');
 			
-			$crud->set_subject('Brand');
+	// 		$crud->set_subject('Brand');
 
-			$crud->set_field_upload('BrandLogo','Images');
+	// 		$crud->set_field_upload('BrandLogo','Images');
 			
 			
 
-			$output = $crud->render();
+	// 		$output = $crud->render();
 
-			$this->_example_output($output);
+	// 		$this->_example_output($output);
 
-		}catch(Exception $e){
-			show_error($e->getMessage().' --- '.$e->getTraceAsString());
-		}
-	}
+	// 	}catch(Exception $e){
+	// 		show_error($e->getMessage().' --- '.$e->getTraceAsString());
+	// 	}
+	// }
 
 	public function specifications()
 	{
@@ -72,13 +75,316 @@ class Backend extends CI_Controller {
 		}
 	}
 
+	public function brands($function="")
+	{
+
+
+		if($function == "")
+		{
+			$data['brands'] = $this->db->query("select * FROM brands ORDER BY BrandTitle");
+
+			// echo $this->db->last_query();
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-managebrands',$data);
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "add")
+		{
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-addbrand');
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "edit")
+		{
+
+			$this->db->where('BrandID',$this->input->get('BrandID'));
+			$data['brand'] = $this->db->get('brands');
+
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-editbrand',$data);
+			$this->load->view('backend/backend-footer');
+		}
+	}
+
+    function checkBrandLogo()
+    {
+        if ($_FILES['BrandLogo']['name']=='')
+        {
+            $this->form_validation->set_message('checkBrandLogo', 'Please Upload a Logo');
+            return FALSE;
+        }
+        else
+        {
+            $this->load->library('upload');
+            $cvconfig['upload_path'] = 'img';
+            $cvconfig['allowed_types'] = 'png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF';
+            $cvconfig['max_size'] = '2048';
+
+            $this->upload->initialize($cvconfig);
+            $this->upload->do_upload('BrandLogo');
+            $data = $this->upload->data();
+
+            $this->Logo = $data['file_name'];
+
+            return TRUE;
+        }
+    }
+
+	function savebrand() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('BrandTitle', 'Brand Title', 'required');
+		$this->form_validation->set_rules('BrandTagLine', 'Brand Tag Line', 'required');
+		$this->form_validation->set_rules('BrandDescription', 'Brand Description', 'required');
+		$this->form_validation->set_rules('BrandLogo', 'Brand Logo', 'callback_checkBrandLogo');
+
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->brands('add');
+		}
+		else
+		{
+
+			$this->db->insert('brands',array(
+				'BrandTitle'=>$this->input->post('BrandTitle'),
+				'BrandTagLine'=>$this->input->post('BrandTagLine'),
+				'BrandDescription'=>$this->input->post('BrandDescription'),
+				'Featured'=>$this->input->post('Featured'),
+				'BrandLogo'=>$this->Logo,
+				'Active'=>$this->input->get('Status')
+			));
+
+			redirect('backend/brands');
+		}
+	}
+
+
+    function checkUpdateBrandLogo()
+    {
+        if ($_FILES['BrandLogo']['name']=='')
+        {
+        	$this->db->where('BrandID',$this->input->get('BrandID'));
+        	$brand=$this->db->get('brands');
+
+        	if(!$brand->row()->BrandLogo){
+
+	            $this->form_validation->set_message('checkUpdateBrandLogo', 'Please Upload a Logo');
+	            return FALSE;
+        	}
+
+        	else {
+        		$this->Logo = $brand->row()->BrandLogo;
+        		return TRUE;
+        	}
+        }
+        else
+        {
+            $this->load->library('upload');
+            $cvconfig['upload_path'] = 'img';
+            $cvconfig['allowed_types'] = 'png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF';
+            $cvconfig['max_size'] = '2048';
+
+            $this->upload->initialize($cvconfig);
+            $this->upload->do_upload('BrandLogo');
+            $data = $this->upload->data();
+
+            $this->Logo = $data['file_name'];
+
+            return TRUE;
+        }
+    }
+
+	function updatebrand() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('BrandTitle', 'Brand Title', 'required');
+		$this->form_validation->set_rules('BrandTagLine', 'Brand Tag Line', 'required');
+		$this->form_validation->set_rules('BrandDescription', 'Brand Description', 'required');
+		$this->form_validation->set_rules('BrandLogo', 'Brand Logo', 'callback_checkUpdateBrandLogo');
+
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->brands('edit');
+		}
+		else
+		{
+
+			$this->db->where('BrandID',$this->input->get('BrandID'));
+			$this->db->update('brands',array(
+				'BrandTitle'=>$this->input->post('BrandTitle'),
+				'BrandTagLine'=>$this->input->post('BrandTagLine'),
+				'BrandDescription'=>$this->input->post('BrandDescription'),
+				'Featured'=>$this->input->post('Featured'),
+				'BrandLogo'=>$this->Logo,
+				'Active'=>$this->input->get('Status')
+			));
+
+			redirect('backend/brands');
+		}
+	}
+
+
+
+	public function catalogues($function="")
+	{
+
+
+		if($function == "")
+		{
+			$data['catalogues'] = $this->db->query("SELECT * FROM catalogues ORDER BY CatalogueTitle");
+
+			
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-managecatalogues',$data);
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "add")
+		{
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-addcatalogue');
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "edit")
+		{
+
+			$this->db->where('CatalogueID',$this->input->get('CatalogueID'));
+			$data['catalogue'] = $this->db->get('catalogues');
+
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-editcatalogue',$data);
+			$this->load->view('backend/backend-footer');
+		}
+	}
+
+    function checkCatalogue()
+    {
+        if ($_FILES['Catalogue']['name']=='')
+        {
+            $this->form_validation->set_message('checkCatalogue', 'Please Upload a Catalogue');
+            return FALSE;
+        }
+        else
+        {
+            $this->load->library('upload');
+            $cvconfig['upload_path'] = 'catalogues';
+            $cvconfig['allowed_types'] = 'png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|pdf|PDF|doc|DOC|docx|DOCX';
+            $cvconfig['max_size'] = '2048';
+
+            $this->upload->initialize($cvconfig);
+            $this->upload->do_upload('Catalogue');
+            $data = $this->upload->data();
+
+            $this->Catalogue = $data['file_name'];
+
+            return TRUE;
+        }
+    }
+
+	function savecatalogue() {
+		$this->load->library('form_validation');
+
+		$this->form_validation->set_rules('CatalogueTitle', 'Catalogue Title', 'required');
+		$this->form_validation->set_rules('Catalogue', 'Catalogue', 'callback_checkCatalogue');
+
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->catalogues('add');
+		}
+		else
+		{
+
+			$this->db->insert('catalogues',array(
+				'CatalogueTitle'=>$this->input->post('CatalogueTitle'),
+				'FileName'=>$this->Catalogue,
+				'Active'=>$this->input->get('Status')
+			));
+
+			redirect('backend/catalogues');
+		}
+	}
+
+
+    function checkUpdateCatalogue()
+    {
+        if ($_FILES['Catalogue']['name']=='')
+        {
+        	$this->db->where('CatalogueID',$this->input->get('CatalogueID'));
+        	$catalogue=$this->db->get('catalogues');
+
+        	if(!$catalogue->row()->FileName){
+
+	            $this->form_validation->set_message('checkUpdateCatalogue', 'Please Upload a Catalogue');
+	            return FALSE;
+        	}
+
+        	else {
+        		$this->Catalogue = $catalogue->row()->FileName;
+        		return TRUE;
+        	}
+        }
+        else
+        {
+            $this->load->library('upload');
+            $cvconfig['upload_path'] = 'catalogues';
+            $cvconfig['allowed_types'] = 'png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|pdf|PDF|doc|DOC|docx|DOCX';
+            $cvconfig['max_size'] = '2048';
+
+            $this->upload->initialize($cvconfig);
+            $this->upload->do_upload('Catalogue');
+            $data = $this->upload->data();
+
+            $this->Catalogue = $data['file_name'];
+
+            return TRUE;
+        }
+    }
+
+	function updatecatalogue() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('CatalogueTitle', 'Catalogue Title', 'required');
+		$this->form_validation->set_rules('Catalogue', 'Brand Logo', 'callback_checkUpdateCatalogue');
+
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->catalogues('edit');
+		}
+		else
+		{
+
+			$this->db->where('CatalogueID',$this->input->get('CatalogueID'));
+			$this->db->update('catalogues',array(
+				'CatalogueTitle'=>$this->input->post('CatalogueTitle'),
+				'FileName'=>$this->Catalogue,
+				'Active'=>$this->input->get('Status')
+			));
+
+			redirect('backend/catalogues');
+		}
+	}
+
 	public function subsections($function="")
 	{
 
 
 		if($function == "")
 		{
-			$data['subsections'] = $this->db->query("select *, (SELECT GROUP_CONCAT(SectionTitle SEPARATOR ', ') FROM sections inner join sectionsubsections on sections.SectionID =sectionsubsections.SectionID  where sectionsubsections.SubSectionID = sub.SubSectionID ) as ParentSections from subsections as sub");
+			$data['subsections'] = $this->db->query("select *, (SELECT GROUP_CONCAT(SectionTitle SEPARATOR ', ') FROM sections inner join sectionsubsections on sections.SectionID =sectionsubsections.SectionID  where sectionsubsections.SubSectionID = sub.SubSectionID ) as ParentSections from subsections as sub Order By SubSectionTitle");
 
 			// echo $this->db->last_query();
 
@@ -188,7 +494,7 @@ class Backend extends CI_Controller {
 
 		if($function == "")
 		{
-			$data['categories'] = $this->db->query("select *, (SELECT GROUP_CONCAT(SubSectionTitle SEPARATOR ', ') FROM subsections inner join categorysubsections on subsections.SubSectionID =categorysubsections.SubSectionID  where categorysubsections.CategoryID = cat.CategoryID ) as SubSections from categories as cat");
+			$data['categories'] = $this->db->query("select *, (SELECT GROUP_CONCAT(SubSectionTitle SEPARATOR ', ') FROM subsections inner join categorysubsections on subsections.SubSectionID =categorysubsections.SubSectionID  where categorysubsections.CategoryID = cat.CategoryID ) as SubSections from categories as cat Order By CategoryTitle");
 
 			// echo $this->db->last_query();
 

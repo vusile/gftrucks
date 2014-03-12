@@ -25,7 +25,8 @@
 					    <ul class="nav nav-tabs nav-stacked">
                             <li><a href="backend/subsections" title="Manage Sub Sections" class="title">Manage Sub Sections</a></li>
 					        <li><a href="backend/categories" title="Manage Categories" class="title">Manage Categories</a></li>
-					        <li><a href="backend-managebrands.html" title="Manage Brands" class="title">Manage Brands</a></li>
+                            <li><a href="backend/brands" title="Manage Brands" class="title">Manage Brands</a></li>
+					        <li><a href="backend/catalogues" title="Manage Catalogues" class="title">Manage Catalogues</a></li>
                             <li><a href="backend-manageproducts.html" title="Manage products" class="title">Manage Products</a></li>
 					        <li><a href="backend-manageweichaiengine.html" title="Manage Weichai Engine" class="title">Manage weichai engine products</a></li>
 					        <li><a href="backend-managehomepage.html" title="Manage Homepage" class="title">Manage Homepage</a></li>
