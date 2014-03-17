@@ -488,6 +488,435 @@ class Backend extends CI_Controller {
 		}
 	}
 
+
+	public function products($function="")
+	{
+
+
+		if($function == "")
+		{
+			// $data['products'] = $this->db->query("select *, (SELECT GROUP_CONCAT(SectionTitle SEPARATOR ', ') FROM categories inner join categorysubsections on categories.CategoryID =categorysubsections.CategoryID  where sectionsubsections.SubSectionID = sub.SubSectionID ) as SubSections from products");
+			$data['products'] = $this->db->query("select *, products.Active as ProductStatus, GROUP_CONCAT( DISTINCT(SectionTitle) SEPARATOR ', ' ) as ParentSections, GROUP_CONCAT( DISTINCT(SubSectionTitle) SEPARATOR ', ' ) as SubSections  from products inner join categories on products.CategoryID = categories.CategoryID inner join subsections  inner join sections where subsections.SubSectionID in (SELECT SubSectionID from categorysubsections WHERE CategoryID = categories.CategoryID) AND sections.SectionID in ( SELECT SectionID from sectionsubsections where SubSectionID = subsections.SubSectionID) group by products.ProductID");
+
+			// echo $this->db->last_query();
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-manageproducts',$data);
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "add")
+		{
+			$data['categories'] = $this->db->get('categories');
+			$data['brands'] = $this->db->get('brands');
+			$data['catalogues'] = $this->db->get('catalogues');
+			$data['specifications'] = $this->db->get('specifications');
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-addproduct',$data);
+			$this->load->view('backend/backend-footer');
+		}
+
+		if($function == "edit")
+		{
+			$data['categories'] = $this->db->get('categories');
+			$data['brands'] = $this->db->get('brands');
+			$data['catalogues'] = $this->db->get('catalogues');
+			$data['specifications'] = $this->db->get('specifications');
+
+			$this->db->where('ProductID',$this->input->get('ProductID'));
+			$data['productimages'] = $this->db->get('productimages');
+
+			$this->db->where('ProductID',$this->input->get('ProductID'));
+			$productspecifications= $this->db->get('productspecifications');
+
+			$data['productspecificationsarray'] = array();
+
+			foreach($productspecifications->result() as $productspecification) {
+				$data['productspecificationsarray'][$productspecification->SpecificationID] = $productspecification->Specification;
+			}
+
+			$this->db->where('ProductID',$this->input->get('ProductID'));
+			$data['product'] = $this->db->get('products')->row();
+
+			$this->load->view('backend/backend-header');
+			$this->load->view('backend/backend-navigation');
+			$this->load->view('backend/backend-editproduct',$data);
+			$this->load->view('backend/backend-footer');
+		}
+	}
+
+	function saveproduct() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('ProductTitle', 'Product Title', 'required');
+		$this->form_validation->set_rules('Features', 'Features', 'required');
+		$this->form_validation->set_rules('Description', 'Description', 'required');
+		$this->form_validation->set_rules('BrandID', 'Brand', 'required');
+		$this->form_validation->set_rules('CategoryID', 'CategoryID', 'required');
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->products('add');
+		}
+		else
+		{
+
+
+			if ($_FILES['NewCatalogue']['name']=='')
+	        {
+	        	if($this->input->post('CatalogueID'))
+	        		$CatalogueID = $this->input->post('CatalogueID');
+	        }
+	        else
+	        {
+
+	            $this->load->library('upload');
+	            $cvconfig['upload_path'] = 'catalogues';
+	            $cvconfig['allowed_types'] = 'png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|pdf|PDF|doc|DOC|docx|DOCX';
+	            $cvconfig['max_size'] = '2048';
+
+	            $this->upload->initialize($cvconfig);
+	            $this->upload->do_upload('NewCatalogue');
+	            $data = $this->upload->data();
+
+	            $this->Catalogue = $data['file_name'];
+
+	        	if($this->input->post('NewCatalogueName'))
+	        		$CatalogueName = $this->input->post('NewCatalogueName');
+	        	else
+	        		$CatalogueName = $this->Catalogue;
+
+	            $this->db->insert('catalogues',array('FileName'=>$this->Catalogue,'CatalogueTitle'=>$CatalogueName));
+
+	            $CatalogueID = $this->db->insert_id();
+	        }
+
+	        $product = array(
+
+				'ProductTitle'=>$this->input->post('ProductTitle'),
+				'Features'=>$this->input->post('Features'),
+				'Description'=>$this->input->post('Description'),
+				'BrandID'=>$this->input->post('BrandID'),
+				'CategoryID'=>$this->input->post('CategoryID')
+
+			);
+
+			if(isset($CatalogueID))
+				$product['CatalogueID'] = $CatalogueID;
+
+			$this->db->insert('products',$product);
+
+			$ProductID = $this->db->insert_id();
+
+			$imagesArray = array();
+
+			for($i=1;$i<=5;$i++)
+			{
+		        if ($_FILES['Image' . $i]['name']!='')
+		        {
+
+		            $this->load->library('upload');
+		            $cvconfig['upload_path'] = 'Images';
+		            $cvconfig['allowed_types'] = 'png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF';
+		            $cvconfig['max_size'] = '2048';
+
+		            $this->upload->initialize($cvconfig);
+
+		            if($this->upload->do_upload('Image' . $i)){
+		            	$data = $this->upload->data();
+		            	$imagesArray[] = array('OrderNum'=>$i,'ProductID'=>$ProductID,'ImageName'=>$data['file_name']);		            
+		            }
+		            
+		        }
+		    }
+
+		    if(count($imagesArray) > 0){
+		    	$this->db->insert_batch('productimages',$imagesArray);
+		    }
+
+			$specifications = $this->db->get('specifications');
+			$specificationsArray = array();
+
+			foreach($specifications->result() as $specification)
+			{
+				if($this->input->post('Specification' . $specification->SpecificationID)) {
+
+					$specificationsArray[] = array(
+							'SpecificationID' => $specification->SpecificationID,
+							'ProductID' => $ProductID,
+							'Specification'=>$this->input->post('Specification' . $specification->SpecificationID)
+
+						);
+
+				}
+			}
+
+
+			if(count($specificationsArray) > 0)
+				$this->db->insert_batch('productspecifications',$specificationsArray);
+
+			if(count($imagesArray) > 0)
+				redirect('backend/resizeImages/' . $ProductID);
+			else
+				redirect('backend/products');
+		}
+	}
+
+	function resizeImages($ProductID) {
+
+		$this->db->where('ProductID',$ProductID);
+		$data['images'] = $this->db->get('productimages');
+		$data['ProductID']= $ProductID;
+
+
+
+		$this->load->view('backend/backend-header');
+		$this->load->view('backend/backend-navigation');
+		$this->load->view('backend/backend-editimages',$data);
+		$this->load->view('backend/backend-footer');
+
+	}
+
+
+	function resizeThumbnailImage($thumb_image_name, $image, $width, $height, $start_width, $start_height, $scale){
+		list($imagewidth, $imageheight, $imageType) = getimagesize($image);
+		$imageType = image_type_to_mime_type($imageType);
+		
+		$newImageWidth = ceil($width * $scale);
+		$newImageHeight = ceil($height * $scale);
+		$newImage = imagecreatetruecolor($newImageWidth,$newImageHeight);
+		switch($imageType) {
+			case "image/gif":
+				$source=imagecreatefromgif($image); 
+				break;
+		    case "image/pjpeg":
+			case "image/jpeg":
+			case "image/jpg":
+				$source=imagecreatefromjpeg($image); 
+				break;
+		    case "image/png":
+			case "image/x-png":
+				$source=imagecreatefrompng($image); 
+				break;
+	  	}
+		imagecopyresampled($newImage,$source,0,0,$start_width,$start_height,$newImageWidth,$newImageHeight,$width,$height);
+		switch($imageType) {
+			case "image/gif":
+		  		imagegif($newImage,$thumb_image_name); 
+				break;
+	      	case "image/pjpeg":
+			case "image/jpeg":
+			case "image/jpg":
+		  		imagejpeg($newImage,$thumb_image_name,90); 
+				break;
+			case "image/png":
+			case "image/x-png":
+				imagepng($newImage,$thumb_image_name);  
+				break;
+	    }
+		chmod($thumb_image_name, 0777);
+		return $thumb_image_name;
+	}
+
+	function generateNewImage( ) {
+
+		$this->load->library('upload');
+    	$this->load->library('image_moo');
+
+		$this->db->where('ProductID',$this->input->post('ProductID'));
+		$this->db->update('products',array('Active'=>$this->input->get('Status')));
+
+		$this->db->where('ProductID',$this->input->post('ProductID'));
+		$images = $this->db->get('productimages');
+
+		foreach($images->result() as $image) {
+
+			if($this->input->post($image->ProductImageID . 'x1'))
+			{
+				$x1 = $this->input->post($image->ProductImageID . 'x1');
+				$y1 = $this->input->post($image->ProductImageID . 'y1');
+				$x2 = $this->input->post($image->ProductImageID . 'x2');
+				$y2 = $this->input->post($image->ProductImageID . 'y2');
+				$w = $this->input->post($image->ProductImageID . 'w');
+				$h = $this->input->post($image->ProductImageID . 'h');
+				//Scale the image to the thumb_width set above
+			}
+			else {
+
+				$x1 = 0;
+				$y1 = 0;
+				$x2 = 270;
+				$y2 = 270;
+				$w = 270;
+				$h = 270;
+				
+			}
+			
+			$scale = 270/$w;
+			$cropped = $this->resizeThumbnailImage("Images/" . $image->ImageName, "Images/" . $image->ImageName,$w,$h,$x1,$y1,$scale);
+
+			// $this->image_moo->load()->resize(600,600)->save("Images/" . $image->ImageName);
+
+		}
+
+		redirect("backend/products");
+
+	}
+
+	function updateproduct() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('ProductTitle', 'Product Title', 'required');
+		$this->form_validation->set_rules('Features', 'Features', 'required');
+		$this->form_validation->set_rules('Description', 'Description', 'required');
+		$this->form_validation->set_rules('BrandID', 'Brand', 'required');
+		$this->form_validation->set_rules('CategoryID', 'CategoryID', 'required');
+
+		if ($this->form_validation->run() == FALSE)
+		{
+			$this->products('add');
+		}
+		else
+		{
+
+
+			if ($_FILES['NewCatalogue']['name']=='')
+	        {
+	        	if($this->input->post('CatalogueID'))
+	        		$CatalogueID = $this->input->post('CatalogueID');
+	        }
+	        else
+	        {
+
+	            $this->load->library('upload');
+	            $cvconfig['upload_path'] = 'catalogues';
+	            $cvconfig['allowed_types'] = 'png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF|pdf|PDF|doc|DOC|docx|DOCX';
+	            $cvconfig['max_size'] = '2048';
+
+	            $this->upload->initialize($cvconfig);
+	            $this->upload->do_upload('NewCatalogue');
+	            $data = $this->upload->data();
+
+	            $this->Catalogue = $data['file_name'];
+
+	        	if($this->input->post('NewCatalogueName'))
+	        		$CatalogueName = $this->input->post('NewCatalogueName');
+	        	else
+	        		$CatalogueName = $this->Catalogue;
+
+	            $this->db->insert('catalogues',array('FileName'=>$this->Catalogue,'CatalogueTitle'=>$CatalogueName));
+
+	            $CatalogueID = $this->db->insert_id();
+	        }
+
+	        $product = array(
+
+				'ProductTitle'=>$this->input->post('ProductTitle'),
+				'Features'=>$this->input->post('Features'),
+				'Description'=>$this->input->post('Description'),
+				'BrandID'=>$this->input->post('BrandID'),
+				'CategoryID'=>$this->input->post('CategoryID')
+
+			);
+
+			if(isset($CatalogueID))
+				$product['CatalogueID'] = $CatalogueID;
+
+
+			$this->db->where('ProductID',$this->input->get('ProductID'));
+			$this->db->update('products',$product);
+
+			$ProductID = $this->input->get('ProductID');
+
+			$imagesArray = array();
+            $delete = array();
+
+			for($i=1;$i<=5;$i++)
+			{
+		        if ($_FILES['Image' . $i]['name']!='')
+		        {
+
+		            $this->load->library('upload');
+		            $cvconfig['upload_path'] = 'Images';
+		            $cvconfig['allowed_types'] = 'png|PNG|jpg|JPG|jpeg|JPEG|gif|GIF';
+		            $cvconfig['max_size'] = '2048';
+
+		            $this->upload->initialize($cvconfig);
+
+		            $delete[] = $i;
+
+
+		            if($this->upload->do_upload('Image' . $i)){
+		            	$data = $this->upload->data();
+		            	$imagesArray[] = array('OrderNum'=>$i,'ProductID'=>$ProductID,'ImageName'=>$data['file_name']);		            
+		            }
+		            
+		        }
+
+		        if($this->input->post('DeleteImage' . $i)) {
+
+		        	$this->db->where('OrderNum',$i);
+		        	$this->db->where('ProductID',$ProductID);
+		        	$Image = $this->db->get('productimages');
+
+
+		        	unlink('Images/' . $Image->ImageName);
+
+		        	$this->db->where('OrderNum',$i);
+		        	$this->db->where('ProductID',$ProductID);
+		        	$this->db->delete('productimages');
+
+		        }
+		    }
+
+		    if(count($imagesArray) > 0){
+
+		    	$this->db->where('ProductID',$ProductID);
+		    	$this->db->where_in('OrderNum',$delete);
+		    	$this->db->delete('productimages');
+
+		    	$this->db->insert_batch('productimages',$imagesArray);
+		    }
+
+			$specifications = $this->db->get('specifications');
+
+			$specificationsArray = array();
+
+			foreach($specifications->result() as $specification)
+			{
+				if($this->input->post('Specification' . $specification->SpecificationID)) {
+
+					$specificationsArray[] = array(
+							'SpecificationID' => $specification->SpecificationID,
+							'ProductID' => $ProductID,
+							'Specification'=>$this->input->post('Specification' . $specification->SpecificationID)
+
+						);
+
+				}
+			}
+
+
+
+			if(count($specificationsArray) > 0){
+
+		    	$this->db->where('ProductID',$this->input->get('ProductID'));
+		    	$this->db->delete('productspecifications');
+
+
+
+				$this->db->insert_batch('productspecifications',$specificationsArray);
+			}
+
+			if(count($imagesArray) > 0)
+				redirect('backend/resizeImages/' . $ProductID);
+			else
+				redirect('backend/products');
+		}
+	}
+
+
 	public function categories($function="")
 	{
 
@@ -523,7 +952,7 @@ class Backend extends CI_Controller {
 			$subsections_categories_array = array();
 
 			foreach($sectioncategories->result() as $sectioncategory) {
-				$subsections_categories_array[] = $sectioncategory->CategoryID;
+				$subsections_categories_array[] = $sectioncategory->SubSectionID;
 			}
 
 			$data['subsections_categories'] = $subsections_categories_array;

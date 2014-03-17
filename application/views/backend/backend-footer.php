@@ -18,18 +18,18 @@
 <script type="text/javascript" src="js/jquery.tweet.js"></script>
 <script type="text/javascript" src="js/imagesloaded.js"></script>
 <script type="text/javascript" src="js/la_boutique.js"></script>
-<script type="text/javascript" src="js/tfingi-megamenu/tfingi-megamenu-frontend.js"></script>
+
 <script type="text/javascript" src="js/chosen.jquery.min.js"></script>
 
 
 
 
 <script type="text/javascript">
-	$(".chosen-select").chosen();
+	//$(".chosen-select").chosen();
 
 </script>
 
 <!--preview only-->
-<script type="text/javascript" src="js/jquery.cookie.js"></script>
+
 <!-- END JAVASCRIPTS -->    </body>
 </html>

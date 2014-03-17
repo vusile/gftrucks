@@ -24,9 +24,9 @@
 
 
 <!-- Comment following two lines to use LESS -->
-<link rel="stylesheet" type="text/css" href="css/core.css" />
+<!-- <link rel="stylesheet" type="text/css" href="css/core.css" />
 <link rel="stylesheet" type="text/css" href="css/chosen.min.css" />
-<link rel="stylesheet" type="text/css" href="css/turquoise.css" id="color_scheme" />
+<link rel="stylesheet" type="text/css" href="css/turquoise.css" id="color_scheme" /> -->
 <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="js/jquery.validate.min.js" ></script>
 
