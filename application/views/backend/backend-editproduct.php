@@ -85,6 +85,24 @@
                                                         </div>
                                                     </div>
 
+                                                    <div class="row-fluid">
+                                                        <div class="span12">
+                                                            <div class="control-group">
+                                                                <label for="Featured" class="control-label"><i class="fa fa-asterisk"></i> Featured</label>
+                                                                <div class="controls">
+                                                                <?php if($product->Featured == 2): ?>
+                                                                    <input type="radio" name = "Featured" id = "Featured1" value="1"> Yes
+                                                                    <input checked type="radio" name = "Featured" id = "Featured2" value="2"> No
+                                                                <?php else: ?>
+                                                                    <input checked type="radio" name = "Featured" id = "Featured1" value="1"> Yes
+                                                                    <input type="radio" name = "Featured" id = "Featured2" value="2"> No
+                                                                <?php endif; ?>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                     
                                           		   
                                                             

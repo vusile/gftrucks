@@ -77,6 +77,18 @@
                                                         </div>
                                                     </div>
 
+                                                    <div class="row-fluid">
+                                                        <div class="span12">
+                                                            <div class="control-group">
+                                                                <label for="Featured" class="control-label"><i class="fa fa-asterisk"></i> Featured</label>
+                                                                <div class="controls">
+                                                                    <input type="radio" name = "Featured" id = "Featured1" value="1"> Yes
+                                                                    <input checked type="radio" name = "Featured" id = "Featured2" value="2"> No
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                     
                                           		   
                                                             

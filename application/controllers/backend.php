@@ -440,7 +440,23 @@ class Backend extends CI_Controller {
 		}
 		else
 		{
-			$this->db->insert('subsections',array('SubSectionTitle'=>$this->input->post('SubSectionTitle'),'Active'=>$this->input->get('Status')));
+
+	        $this->db->where('UPPER(URLSafeTitle)',strtoupper(preg_replace('/[\s\W]+/',"",$this->input->post('SubSectionTitle'))),TRUE);
+
+	        $subsections = $this->db->get('subsections');
+
+	        if($subsections->num_rows() > 0) {
+	        	$num = $subsections->num_rows() + 1;
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('SubSectionTitle')) . $num;
+	        	$URLSafeTitleDashed = url_title($this->input->post('SubSectionTitle')) . "-" . $num;
+	        }
+
+	        else {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('SubSectionTitle'));
+	        	$URLSafeTitleDashed = url_title($this->input->post('SubSectionTitle'));
+	        }
+
+			$this->db->insert('subsections',array('SubSectionTitle'=>$this->input->post('SubSectionTitle'),'Active'=>$this->input->get('Status'),'URLSafeTitle'=>$URLSafeTitle,'URLSafeTitleDashed'=>$URLSafeTitleDashed));
 
 			$SubSectionID = $this->db->insert_id();
 
@@ -467,8 +483,24 @@ class Backend extends CI_Controller {
 		}
 		else
 		{
+	        $this->db->where('UPPER(URLSafeTitle)',strtoupper(preg_replace('/[\s\W]+/',"",$this->input->post('SubSectionTitle'))),TRUE);
+	        $this->db->where('SubSectionID <>',$this->input->get('SubSectionID'));
+	        $subsections = $this->db->get('subsections');
+
+	        if($subsections->num_rows() > 0) {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('SubSectionTitle')) . ($subsections->num_rows() + 2);
+	        	$URLSafeTitleDashed = url_title($this->input->post('SubSectionTitle')) . '-' . ($subsections->num_rows() + 2);
+	        	
+	        }
+
+	        else {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('SubSectionTitle'));
+	        	$URLSafeTitleDashed = url_title($this->input->post('SubSectionTitle'));
+	        	
+	        }
+
 			$this->db->where('SubSectionID',$this->input->get('SubSectionID'));
-			$this->db->update('subsections',array('SubSectionTitle'=>$this->input->post('SubSectionTitle'),'Active'=>$this->input->get('Status')));
+			$this->db->update('subsections',array('SubSectionTitle'=>$this->input->post('SubSectionTitle'),'Active'=>$this->input->get('Status'),'URLSafeTitle'=>$URLSafeTitle,'URLSafeTitleDashed'=>$URLSafeTitleDashed));
 
 			$SubSectionID = $this->input->get('SubSectionID');
 
@@ -593,13 +625,31 @@ class Backend extends CI_Controller {
 	            $CatalogueID = $this->db->insert_id();
 	        }
 
+
+	        $this->db->where('UPPER(URLSafeTitle)',strtoupper(preg_replace('/[\s\W]+/',"",$this->input->post('ProductTitle'))),TRUE);
+	        
+	        $products = $this->db->get('products');
+
+	        if($products->num_rows() > 0) {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('ProductTitle')) . $products->num_rows() + 1;
+	        	$URLSafeTitleDashed = url_title($this->input->post('ProductTitle')) . $products->num_rows() + 1;
+	        }
+
+	        else {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('ProductTitle'));
+	        	$URLSafeTitleDashed = url_title($this->input->post('ProductTitle'));
+	        }
+
 	        $product = array(
 
 				'ProductTitle'=>$this->input->post('ProductTitle'),
 				'Features'=>$this->input->post('Features'),
 				'Description'=>$this->input->post('Description'),
 				'BrandID'=>$this->input->post('BrandID'),
-				'CategoryID'=>$this->input->post('CategoryID')
+				'Featured'=>$this->input->post('Featured'),
+				'CategoryID'=>$this->input->post('CategoryID'),
+				'URLSafeTitle'=>$URLSafeTitle,
+				'URLSafeTitleDashed'=>$URLSafeTitleDashed
 
 			);
 
@@ -810,13 +860,30 @@ class Backend extends CI_Controller {
 	            $CatalogueID = $this->db->insert_id();
 	        }
 
+	        $this->db->where('UPPER(URLSafeTitle)',strtoupper(preg_replace('/[\s\W]+/',"",$this->input->post('ProductTitle'))),TRUE);
+	        $this->db->where('ProductID <>',$this->input->get('ProductID'));
+	        $products = $this->db->get('products');
+
+	        if($products->num_rows() > 0) {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('ProductTitle')) . $products->num_rows() + 1;
+	        	$URLSafeTitleDashed = url_title($this->input->post('ProductTitle')) . $products->num_rows() + 1;
+	        }
+
+	        else {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('ProductTitle'));
+	        	$URLSafeTitleDashed = url_title($this->input->post('ProductTitle')) ;
+	        }
+
 	        $product = array(
 
 				'ProductTitle'=>$this->input->post('ProductTitle'),
 				'Features'=>$this->input->post('Features'),
 				'Description'=>$this->input->post('Description'),
 				'BrandID'=>$this->input->post('BrandID'),
-				'CategoryID'=>$this->input->post('CategoryID')
+				'Featured'=>$this->input->post('Featured'),
+				'CategoryID'=>$this->input->post('CategoryID'),
+				'URLSafeTitle'=>$URLSafeTitle,
+				'URLSafeTitleDashed'=>$URLSafeTitleDashed
 
 			);
 
@@ -979,7 +1046,23 @@ class Backend extends CI_Controller {
 		}
 		else
 		{
-			$this->db->insert('categories',array('CategoryTitle'=>$this->input->post('CategoryTitle'),'Active'=>$this->input->get('Status')));
+
+	        $this->db->where('UPPER(URLSafeTitle)',strtoupper(preg_replace('/[\s\W]+/',"",$this->input->post('CategoryTitle'))),TRUE);
+	    
+	        $categories = $this->db->get('categories');
+
+	        if($categories->num_rows() > 0) {
+	        	 
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('CategoryTitle')) . ($categories->num_rows() + 1);
+	        	$URLSafeTitleDashed = url_title($this->input->post('CategoryTitle')) . ($categories->num_rows() + 1);
+	        }
+
+	        else {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('CategoryTitle'));
+	        	$URLSafeTitleDashed = url_title($this->input->post('CategoryTitle'));
+	        }
+
+			$this->db->insert('categories',array('CategoryTitle'=>$this->input->post('CategoryTitle'),'Active'=>$this->input->get('Status'),'URLSafeTitle'=>$URLSafeTitle,'URLSafeTitleDashed'=>$URLSafeTitleDashed));
 
 			$CategoryID = $this->db->insert_id();
 
@@ -1007,8 +1090,23 @@ class Backend extends CI_Controller {
 		}
 		else
 		{
+
+	        $this->db->where('UPPER(URLSafeTitle)',strtoupper(preg_replace('/[\s\W]+/',"",$this->input->post('CategoryTitle'))),TRUE);
+	        $this->db->where('CategoryID <>',$this->input->get('CategoryID'));
+	        $categories = $this->db->get('categories');
+
+	        if($categories->num_rows() > 0) {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('CategoryTitle')) . ($categories->num_rows() + 1);
+	        	$URLSafeTitleDashed = url_title($this->input->post('CategoryTitle')) . "-" . ($categories->num_rows() + 1);	
+	        }
+
+	        else {
+	        	$URLSafeTitle = preg_replace('/[\s\W]+/',"",$this->input->post('CategoryTitle'));
+	        	$URLSafeTitleDashed = url_title($this->input->post('CategoryTitle'));	
+	        }
+
 			$this->db->where('CategoryID',$this->input->get('CategoryID'));
-			$this->db->update('categories',array('CategoryTitle'=>$this->input->post('CategoryTitle'),'Active'=>$this->input->get('Status')));
+			$this->db->update('categories',array('CategoryTitle'=>$this->input->post('CategoryTitle'),'Active'=>$this->input->get('Status'),'URLSafeTitle'=>$URLSafeTitle,'URLSafeTitleDashed'=>$URLSafeTitleDashed));
 
 			$CategoryID = $this->input->get('CategoryID');
 			
