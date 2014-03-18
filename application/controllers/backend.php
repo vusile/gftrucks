@@ -797,17 +797,17 @@ class Backend extends CI_Controller {
 
 				$x1 = 0;
 				$y1 = 0;
-				$x2 = 270;
-				$y2 = 270;
-				$w = 270;
-				$h = 270;
+				$x2 = 370;
+				$y2 = 370;
+				$w = 370;
+				$h = 370;
 				
 			}
 			
-			$scale = 270/$w;
-			$cropped = $this->resizeThumbnailImage("Images/" . $image->ImageName, "Images/" . $image->ImageName,$w,$h,$x1,$y1,$scale);
+			$scale = 370/$w;
+			$cropped = $this->resizeThumbnailImage("Images/370px-" . $image->ImageName, "Images/" . $image->ImageName,$w,$h,$x1,$y1,$scale);
 
-			// $this->image_moo->load()->resize(600,600)->save("Images/" . $image->ImageName);
+			$this->image_moo->load("Images/370px-" . $image->ImageName)->resize(270,270)->save("Images/" . $image->ImageName,TRUE);
 
 		}
 

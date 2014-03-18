@@ -126,7 +126,7 @@
                         <?php foreach($subsections->result() as $subsection): ?>
 
                             <?php if($subsection->SectionID==1): ?>
-                            <li class="menu-item-has-children"><a href="<?php echo $subsection->URLSafeTitleDashed ?>"><?php echo $subsection->SubSectionTitle ?></a>
+                            <li class="menu-item-has-children"><a href="commercial-trucks/<?php echo $subsection->URLSafeTitleDashed ?>"><?php echo $subsection->SubSectionTitle ?></a>
 
                                 <?php 
                                     $this->db->from('categorysubsections');
@@ -139,7 +139,7 @@
                                 <?php if($categories->num_rows()): ?>
                                     <ul class="sub-menu">
                                         <?php foreach($categories->result() as $category): ?>
-                                            <li><a href="<?php echo $category->URLSafeTitleDashed ?>"><?php echo $category->CategoryTitle ?></a></li>
+                                            <li><a href="commercial-trucks/<?php echo $category->URLSafeTitleDashed ?>"><?php echo $category->CategoryTitle ?></a></li>
 
                                         <?php endforeach; ?>
                                     </ul>
@@ -153,13 +153,13 @@
             </li>
 	    
 
-            <li class="menu-item-has-children"><a href="Construction-Equipment">Construction Equipment</a>
+            <li class="menu-item-has-children"><a href="construction-equipment">Construction Equipment</a>
                 <?php if($subsections->num_rows() > 0): ?>
                     <ul class="sub-menu">
                         <?php foreach($subsections->result() as $subsection): ?>
 
                             <?php if($subsection->SectionID==2): ?>
-                            <li class="menu-item-has-children"><a href="<?php echo $subsection->URLSafeTitleDashed ?>"><?php echo $subsection->SubSectionTitle ?></a>
+                            <li class="menu-item-has-children"><a href="construction-equipment/<?php echo $subsection->URLSafeTitleDashed ?>"><?php echo $subsection->SubSectionTitle ?></a>
 
                                 <?php 
                                     $this->db->from('categorysubsections');
@@ -172,7 +172,7 @@
                                 <?php if($categories->num_rows()): ?>
                                     <ul class="sub-menu">
                                         <?php foreach($categories->result() as $category): ?>
-                                            <li><a href="<?php echo $category->URLSafeTitleDashed ?>"><?php echo $category->CategoryTitle ?></a></li>
+                                            <li><a href="construction-equipment/<?php echo $category->URLSafeTitleDashed ?>"><?php echo $category->CategoryTitle ?></a></li>
 
                                         <?php endforeach; ?>
                                     </ul>
@@ -187,13 +187,13 @@
 	     <!-- Construction Equipment END-->
 	     
 	    <!-- Mining Equipment START-->
-            <li class="menu-item-has-children"><a href="Mining-Equipment">Mining Equipment</a>
+            <li class="menu-item-has-children"><a href="mining-equipment">Mining Equipment</a>
                 <?php if($subsections->num_rows() > 0): ?>
                     <ul class="sub-menu">
                         <?php foreach($subsections->result() as $subsection): ?>
 
                             <?php if($subsection->SectionID==3): ?>
-                            <li class="menu-item-has-children"><a href="<?php echo $subsection->URLSafeTitleDashed ?>"><?php echo $subsection->SubSectionTitle ?></a>
+                            <li class="menu-item-has-children"><a href="mining-equipment/<?php echo $subsection->URLSafeTitleDashed ?>"><?php echo $subsection->SubSectionTitle ?></a>
 
                                 <?php 
                                     $this->db->from('categorysubsections');
@@ -206,7 +206,7 @@
                                 <?php if($categories->num_rows()): ?>
                                     <ul class="sub-menu">
                                         <?php foreach($categories->result() as $category): ?>
-                                            <li><a href="<?php echo $category->URLSafeTitleDashed ?>"><?php echo $category->CategoryTitle ?></a></li>
+                                            <li><a href="mining-equipment/<?php echo $category->URLSafeTitleDashed ?>"><?php echo $category->CategoryTitle ?></a></li>
 
                                         <?php endforeach; ?>
                                     </ul>

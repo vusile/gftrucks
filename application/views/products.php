@@ -12,44 +12,34 @@
                                 <!-- Sidebar -->
                                 <aside class="sidebar">
 
-                                    <div class="children">
-                                        <div class="box border-top">
+                                    <?php if($subsections->num_rows() >0): ?>
 
-                                            <div class="hgroup title">
-                                                <h3>
-                                                    <a href="<?php echo $URL ?>" title="Womens"><?php echo strtoupper($Title) ?></a>
-                                                </h3>
+                                        <div class="children">
+                                            <div class="box border-top">
+
+                                                <div class="hgroup title">
+                                                    <h3>
+                                                        <a href="<?php echo $URL ?>" title="Womens"><?php echo strtoupper($Title) ?></a>
+                                                    </h3>
+                                                </div>
+
+                                                <ul class="category-list secondary">
+
+                                                    <?php foreach($subsections->result() as $subsection): ?>
+                                                        <li >
+                                                            <a href="<?php echo $URL . "/" . $subsection->URLSafeTitleDashed ?>" title="Wheel Loaders">
+                                                                <span class="count"><?php echo $subsection->ProdCount; ?> </span>
+                                                                          
+                                                                <?php echo $subsection->SubSectionTitle; ?>				
+                                                            </a>
+                                                        </li>
+                                                    <?php endforeach; ?>
+
+                                                   
+                                                </ul>
                                             </div>
-
-                                            <ul class="category-list secondary">
-                                                <li >
-                                                    <a href="GFproducts.html" title="Wheel Loaders">
-                                                        <span class="count">4</span>
-                                                        Wheel Loaders				
-                                                    </a>
-                                                </li>
-                                                <li >
-                                                    <a href="GFproducts.html" title="Motor Grades">
-                                                        <span class="count">8</span>
-                                                        Motor Graders		
-                                                    </a>
-                                                </li>
-                                                <li >
-                                                    <a href="GFproducts.html" title="Concrete Mixer">
-                                                        <span class="count">2</span>
-                                                        Concrete Mixer				
-                                                    </a>
-                                                </li>
-                                                <li >
-                                                    <a href="GFproducts.html" title="Road Construction Rollers">
-                                                        <span class="count">3</span>
-                                                        Road Construction Rollers			
-                                                    </a>
-                                                </li>
-                                               
-                                            </ul>
                                         </div>
-                                    </div>
+                                    <?php endif; ?>
 
                                   
                                     <!-- Latest reviews -->
@@ -104,8 +94,10 @@
 
                             
                             <div class="span9">
+
+
 				    
-				     <div class="span7"><h1><?php echo strtoupper($Title) ?></h1></div>
+				     <div class="span7"><h1><?php echo strtoupper($PageTitle) ?></h1></div>
 
                                 <!-- Products list -->
                         <ul class="product-list isotope">
@@ -113,9 +105,9 @@
 
                                 <?php $images = explode("GFIMGSEP", $product->Images); ?>
                                 <li class="standard" data-price="58">
-                                    <a href="<?php echo $product->URLSafeTitleDashed ?>" title="<?php echo $product->ProductTitle ?>">
+                                    <a href="<?php echo $URL ?>/<?php echo $product->URLSafeTitleDashed ?>" title="<?php echo $product->ProductTitle ?>">
 
-                                        <?php if(count($images) > 0): ?>
+                                        <?php if($product->Images): ?>
                                             <div class="image">
                                                 <img class="primary" src="Images/<?php echo $images[0] ?>" alt="<?php echo $product->ProductTitle ?>" />
                                                 <?php if(isset($images[1])): ?>
@@ -136,15 +128,7 @@
                             <?php endforeach; ?>
                             
                         </ul>
-<!-- End class="product-list isotope" -->                
-                                
-                                <!-- "Load More" Button 
 
-                                <button id="load_more" class="btn btn-block" data-category="16" data-rows="20" data-page="1" data-featured="true">
-                                    <span>Load more</span> &nbsp; <i class="icon-spinner icon-spin icon-large"></i>
-                                </button>
-                                
-                             End "Load More" Button -->
 
                             </div>
                             

@@ -52,7 +52,7 @@
 
                             <?php if($subsection->SectionID==1): ?>
                             <li >
-                                <a href="<?php echo $subsection->URLSafeTitleDashed ?>" title = "<?php echo $subsection->SubSectionTitle ?>"><?php echo $subsection->SubSectionTitle ?></a>
+                                <a href="commercial-trucks/<?php echo $subsection->URLSafeTitleDashed ?>" title = "<?php echo $subsection->SubSectionTitle ?>"><?php echo $subsection->SubSectionTitle ?></a>
 
                             </li>
                             <?php endif; ?>
@@ -73,7 +73,7 @@
 
                                 <?php if($subsection->SectionID==2): ?>
                                 <li >
-                                    <a href="<?php echo $subsection->URLSafeTitleDashed ?>" title = "<?php echo $subsection->SubSectionTitle ?>"><?php echo $subsection->SubSectionTitle ?></a>
+                                    <a href="construction-equipment/<?php echo $subsection->URLSafeTitleDashed ?>" title = "<?php echo $subsection->SubSectionTitle ?>"><?php echo $subsection->SubSectionTitle ?></a>
 
                                 </li>
                                 <?php endif; ?>
@@ -95,7 +95,7 @@
 
                                 <?php if($subsection->SectionID==3): ?>
                                 <li >
-                                    <a href="<?php echo $subsection->URLSafeTitleDashed ?>" title = "<?php echo $subsection->SubSectionTitle ?>"><?php echo $subsection->SubSectionTitle ?></a>
+                                    <a href="mining-equipment/<?php echo $subsection->URLSafeTitleDashed ?>" title = "<?php echo $subsection->SubSectionTitle ?>"><?php echo $subsection->SubSectionTitle ?></a>
 
                                 </li>
                                 <?php endif; ?>

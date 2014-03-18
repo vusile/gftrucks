@@ -6,8 +6,8 @@
 <?php foreach($images->result() as $image): ?>
 
 function preview<?php echo $image->ProductImageID ?>(img, selection) { 
-    var scaleX = 270 / selection.width; 
-    var scaleY = 270 / selection.height; 
+    var scaleX = 370 / selection.width; 
+    var scaleY = 370 / selection.height; 
 
 
     <?php $ImageSize = getimagesize('Images/' . $image->ImageName ); ?>
@@ -72,11 +72,20 @@ $(window).load(function () {
                             <?php foreach($images->result() as $image): ?>
 
                                 <div align="center">
-                                    <img src="Images/<?php echo $image->ImageName ?>" style="float: left; margin-right: 10px;" id="<?php echo $image->ProductImageID ?>thumbnail" alt="Create Thumbnail" />
 
-                                    <div style="border:1px #e5e5e5 solid; float:left; position:relative; overflow:hidden; width:270px; height:270px;">
-                                        <img src="Images/<?php echo $image->ImageName ?>" style="position: relative;" alt="Thumbnail Preview" />
-                                    </div>
+                                    <?php if(file_exists('Images/370px-<?php echo $image->ImageName ?>')): ?>
+                                        <img src="Images/370px-<?php echo $image->ImageName ?>" style="float: left; margin-right: 10px;" id="<?php echo $image->ProductImageID ?>thumbnail" alt="Create Thumbnail" />
+
+                                        <div style="border:1px #e5e5e5 solid; float:left; position:relative; overflow:hidden; width:370px; height:370px;">
+                                            <img src="Images/370px-<?php echo $image->ImageName ?>" style="position: relative;" alt="Thumbnail Preview" />
+                                        </div>
+                                    <?php else: ?>
+                                       <img src="Images/<?php echo $image->ImageName ?>" style="float: left; margin-right: 10px;" id="<?php echo $image->ProductImageID ?>thumbnail" alt="Create Thumbnail" />
+
+                                        <div style="border:1px #e5e5e5 solid; float:left; position:relative; overflow:hidden; width:370px; height:370px;">
+                                            <img src="Images/<?php echo $image->ImageName ?>" style="position: relative;" alt="Thumbnail Preview" />
+                                        </div>
+                                    <?php endif; ?>
                                     <br style="clear:both;"/>
                                         <input type="hidden" name="<?php echo $image->ProductImageID ?>x1" value="" id="<?php echo $image->ProductImageID ?>x1" />
                                         <input type="hidden" name="<?php echo $image->ProductImageID ?>y1" value="" id="<?php echo $image->ProductImageID ?>y1" />
